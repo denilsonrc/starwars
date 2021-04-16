@@ -11,7 +11,7 @@ SPECIES = 'species/'
 FILMS = 'films/'
 
 #criação do banco
-Sequel.connect('sqlite://starwars.db'){|db|
+Sequel.connect('sqlite://starwars/db/development.db'){|db|
     db.create_table :people do
         primary_key :id
         String :name
@@ -95,7 +95,7 @@ Sequel.connect('sqlite://starwars.db'){|db|
     db.create_table :films do
         primary_key :id
         String :title
-        Integer :epsode_id
+        Integer :episode_id
         String :opening_crawl
         String :director
         String :producer
@@ -139,7 +139,7 @@ films = get_all(FILMS)
 puts "starships: #{starships.count} - people: #{people.count} - planets: #{planets.count} - vehicles: #{vehicles.count} - species: #{species.count} - films: #{films.count}"
 
 
-Sequel.connect('sqlite://starwars.db'){|db|
+Sequel.connect('sqlite://starwars/db/development.db'){|db|
     planets.map{|planet|
         db[:planets].insert(:name=>planet["name"], :rotation_period=>planet["rotation_period"], :orbital_period=>planet["orbital_period"], :diameter=>planet["diameter"], :climate=> planet["climate"], :gravity=>planet["gravity"], :terrain=>planet["terrain"], :surface_water=>planet["surface_water"], :population=>planet["population"], :created=>planet["created"], :edited=>planet["edited"], :url=>planet["url"])
     }
@@ -187,7 +187,7 @@ Sequel.connect('sqlite://starwars.db'){|db|
         }
     }
     films.map{|film|
-        resp = db[:films].insert(:title=>film["title"], :epsode_id=>film["episode_id"], :opening_crawl=>film["opening_crawl"], :director=>film["director"], :producer=>film["producer"], :release_date=>film["release_date"], :created=>film["created"], :edited=>film["edited"], :url=>film["url"])
+        resp = db[:films].insert(:title=>film["title"], :episode_id=>film["episode_id"], :opening_crawl=>film["opening_crawl"], :director=>film["director"], :producer=>film["producer"], :release_date=>film["release_date"], :created=>film["created"], :edited=>film["edited"], :url=>film["url"])
         film["characters"].map{|url|
             unless url.nil? and url.empty?
                 person = db[:people][:url=>url]
