@@ -1,10 +1,10 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th scope="col">id</th>
+      <th scope="col">Id</th>
       <th scope="col">Name</th>
-      <th scope="col">Last</th>
-      <th scope="col">Handle</th>
+      <th scope="col">Height</th>
+      <th scope="col">Mass(kg)</th>
     </tr>
   </thead>
   <tbody>
@@ -12,9 +12,10 @@
         <tr>
             <th scope="row"><%= link_to person.id, people_show_path(person.id) %></th>
             <td><%= person.name %></td>
-            <td>Otto</td>
-            <td>mdo</td>
+            <td><%= person.height %></td>
+            <td><%= person.mass %></td>
         </tr>
     <% end %>
-  </tbody>
+    </tbody>
 </table>
+<%= paginate @people %>

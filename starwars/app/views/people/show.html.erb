@@ -1,10 +1,13 @@
 <div class="card">
   <div class="card-header">
-    Featured
+    Frase de introdução do <%= @person.name %>
   </div>
   <div class="card-body">
-    <h5 class="card-title">Special title treatment</h5>
-    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+    <h5 class="card-title"></h5>
+    <p class="card-text">
+        Olá, meu nome é <%= @person.name %>. <%= @person.specie_name %> e
+        peso <%= @person.mass %> kg, <%= @person.planet_name %> no ano de <%= @person.birth_year %>. <%= @person.vehicle_name %> 
+    </p>
     <%= link_to "voltar", people_index_path, :class=>"btn btn-primary" %>
   </div>
 </div>
