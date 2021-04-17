@@ -1,7 +1,7 @@
 class PeopleController < ApplicationController
   before_action :set_person, only: :show  
   def index
-    @people = Person.all
+    @people = Person.all.page(params[:page]).per(10)
   end
   def show
     
