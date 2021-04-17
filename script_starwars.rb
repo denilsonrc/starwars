@@ -66,8 +66,6 @@ Sequel.connect('sqlite://starwars/db/development.db'){|db|
         DateTime :edited
         String :url
 
-        #relacionamento de pessoas e planetas já implementado
-
     end
 
     db.create_table :vehicles do
@@ -118,7 +116,6 @@ Sequel.connect('sqlite://starwars/db/development.db'){|db|
 }
 
 #consumindo a api
-
 def get_all(param)
     controle_api = JSON.parse(RestClient.get("#{BASE_URL}#{param}").body)
     array_resp = controle_api['results'] 
@@ -127,6 +124,16 @@ def get_all(param)
         array_resp += controle_api['results']
     end
     return array_resp
+end
+#função para inserir registros de tabelas com relação de n para n
+def insert_relationship(db, url, table_a, table_b, plural_a, plural_b, id)
+    unless url.nil? and url.empty?
+        model = db[:"#{plural_a}"][:url=>url]
+        unless model.nil?
+            model = model[:id] 
+            db[:"#{plural_b}_#{plural_a}"].insert(:"#{table_b}_id"=>id,:"#{table_a}_id"=>model) 
+        end
+    end
 end
 
 starships = get_all(STARSHIPS)
@@ -159,79 +166,33 @@ Sequel.connect('sqlite://starwars/db/development.db'){|db|
         planet = planet[:id] unless planet.nil?
         resp = db[:people].insert(:name=>person["name"], :height=>person["height"], :mass=>person["mass"], :hair_color=>person["hair_color"], :skin_color=>person["skin_color"], :eye_color=>person["eye_color"], :birth_year=>person["birth_year"], :gender=>person["gender"], :created=>person["created"], :edited=>person["edited"], :url=>person["url"], :planet_id=>planet)
         person["species"].map{|url|
-            unless url.nil? and url.empty?
-                specie = db[:species][:url=>url]
-                unless specie.nil?
-                    specie = specie[:id] 
-                    db[:people_species].insert(:person_id=>resp,:specie_id=>specie) 
-                end
-            end
+            insert_relationship(db,url, "specie", "person", "species", "people", resp)
         }
         person["vehicles"].map{|url|
-            unless url.nil? and url.empty?
-                vehicle = db[:vehicles][:url=>url]
-                unless vehicle.nil?
-                    vehicle = vehicle[:id] 
-                    db[:people_vehicles].insert(:person_id=>resp,:vehicle_id=>vehicle) 
-                end
-            end
+            insert_relationship(db,url, "vehicle", "person", "vehicles", "people", resp)
         }
+        #classe starships e vehicles vindos da api compartilham a mesma tabela no banco
         person["starships"].map{|url|
-            unless url.nil? and url.empty?
-                starship = db[:vehicles][:url=>url]
-                unless starship.nil?
-                    starship = starship[:id] 
-                    db[:people_vehicles].insert(:person_id=>resp,:vehicle_id=>starship) 
-                end
-            end
+            insert_relationship(db,url, "vehicle", "person", "vehicles", "people", resp)
         }
     }
     films.map{|film|
         resp = db[:films].insert(:title=>film["title"], :episode_id=>film["episode_id"], :opening_crawl=>film["opening_crawl"], :director=>film["director"], :producer=>film["producer"], :release_date=>film["release_date"], :created=>film["created"], :edited=>film["edited"], :url=>film["url"])
         film["characters"].map{|url|
-            unless url.nil? and url.empty?
-                person = db[:people][:url=>url]
-                unless person.nil?
-                    person = person[:id] 
-                    db[:films_people].insert(:film_id=>resp,:person_id=>person) 
-                end
-            end
+            insert_relationship(db,url, "person", "film", "people", "films", resp)
         }
         film["species"].map{|url|
-            unless url.nil? and url.empty?
-                specie = db[:species][:url=>url]
-                unless specie.nil?
-                    specie = specie[:id]
-                    db[:films_species].insert(:film_id=>resp,:specie_id=>specie)
-                end 
-            end
+            insert_relationship(db,url, "specie", "film", "species", "films", resp)
         }
         film["planets"].map{|url|
-            unless url.nil? and url.empty?
-                planet = db[:planets][:url=>url]
-                unless planet.nil?
-                    planet = planet[:id] 
-                    db[:films_planets].insert(:film_id=>resp,:planet_id=>planet) 
-                end
-            end
+            insert_relationship(db,url, "planet", "film", "planets", "films", resp)
         }
         film["starships"].map{|url|
-            unless url.nil? and url.empty?
-                starship = db[:vehicles][:url=>url]
-                unless starship.nil?
-                    starship = starship[:id] 
-                    db[:films_vehicles].insert(:film_id=>resp,:vehicle_id=>starship) 
-                end
-            end
+            insert_relationship(db,url, "vehicle", "film", "vehicles", "films", resp)
         }
+        #classe starships e vehicles vindos da api compartilham a mesma tabela no banco
         film["vehicles"].map{|url|
-            unless url.nil? and url.empty?
-                vehicle = db[:vehicles][:url=>url]
-                unless vehicle.nil?
-                    vehicle = vehicle[:id] 
-                    db[:films_vehicles].insert(:film_id=>resp,:vehicle_id=>vehicle) 
-                end
-            end
+            insert_relationship(db,url, "vehicle", "film", "vehicles", "films", resp)
         }
     }
 }
